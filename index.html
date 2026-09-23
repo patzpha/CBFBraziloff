@@ -1,229 +1,825 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAR CBF - Animação Total</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
-body {
-  background: linear-gradient(135deg, #0A2390 0%, #1E50D0 50%, #0A2390 100%);
-  min-height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayStation 5</title>
+  <script src="https://kit.fontawesome.com/0c87a70838.js"></script>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
 
-.var-screen {
-  width: 1080px; height: 600px;
-  background: linear-gradient(180deg, #0F34B8 0%, #2060E8 100%);
-  position: relative; overflow: hidden;
-}
+    body {
+        background: #000;
+        min-height: 100vh;
+        color: #ffffff;
+        overflow: hidden;
+    }
 
-/* Brilho de fundo pulsando */
-.screen-glow {
-  position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
-  animation: pulseGlow 2s ease-in-out infinite;
-}
+    /* TELA INICIAL — fundo GIF + botão */
+    .start-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('assets/gifs/gif-fundo-ps5.gif') no-repeat center center fixed;
+        background-size: cover;
+        z-index: 999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
 
-/* === TOPO: TROFÉU + CBF === */
-.top-logos {
-  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 15px;
-}
+    .start-screen.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
 
-/* TROFÉU - animação própria */
-.trophy-logo {
-  width: 70px; height: 70px; object-fit: contain;
-  opacity: 0; transform: scale(0) rotate(-180deg);
-  animation: logoSpinIn 0.5s ease-out forwards, floatBounce 2s ease-in-out infinite 0.5s, glowPulse 1.5s ease-in-out infinite 0.5s;
-}
+    .ps5-new-user {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
 
-.divider {
-  width: 2px; height: 0; background: #fff; opacity: 0;
-  animation: lineGrow 0.35s ease-out 0.2s forwards, flicker 1s ease-in-out infinite 0.5s;
-}
+    .outer-ring {
+        width: 104px;
+        height: 104px;
+        border-radius: 50%;
+        border: 3px solid #000000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.25s ease;
+        background: rgba(42, 42, 44, 0.3);
+    }
 
-/* ESCUDO CBF - animação própria */
-.cbf-shield {
-  width: 70px; height: 80px; object-fit: contain;
-  opacity: 0; transform: scale(0) rotate(180deg);
-  animation: logoSpinIn 0.5s ease-out 0.35s forwards, floatBounce 2s ease-in-out infinite 0.8s, glowPulse 1.5s ease-in-out infinite 0.8s;
-}
+    .circle-btn {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: #2a2a2c;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background 0.25s ease;
+    }
 
-/* === MIDEA - animação própria === */
-.midea-box {
-  position: absolute; left: 20px; bottom: 120px;
-  background: #0090FF; padding: 12px 22px; border-radius: 4px;
-  transform: translateX(-100%) skewX(-15deg); opacity: 0;
-  animation: mideaBurst 0.5s cubic-bezier(0.17, 0.67, 0.12, 0.99) 0.1s forwards;
-  box-shadow: 0 0 0 rgba(0,144,255,0);
-}
-.midea-logo {
-  height: 36px; width: auto; object-fit: contain;
-  filter: brightness(1);
-  animation: logoBrightPulse 1.2s ease-in-out infinite 0.5s;
-}
+    .ps5-new-user:hover .outer-ring {
+        transform: scale(1.05);
+    }
+    .ps5-new-user:hover .circle-btn {
+        background: #38383a;
+    }
 
-/* === CBF TEXTO === */
-.cbf-label {
-  color: #fff; font-size: 32px; font-weight: bold;
-  margin-left: 30px; margin-bottom: 5px;
-  opacity: 0; transform: translateY(15px) scale(0.9);
-  animation: textPop 0.4s ease-out 0.45s forwards;
-}
+    .plus-icon {
+        color: #ffffff;
+        font-size: 40px;
+        font-weight: 300;
+        line-height: 1;
+    }
 
-/* === VAR LETRAS === */
-.var-group {
-  position: absolute; left: 220px; bottom: 80px;
-}
-.var-text-wrapper {
-  position: relative; display: inline-block;
-}
-.var-letter {
-  display: inline-block;
-  color: #fff; font-size: 110px; font-weight: 900;
-  line-height: 1;
-  opacity: 0; transform: translateY(40px) scale(0.7);
-  text-shadow: 0 0 0 rgba(255,255,255,0);
-  animation: letterBurst 0.45s ease-out forwards;
-}
-.var-letter:nth-child(1) { animation-delay: 0.55s; }
-.var-letter:nth-child(2) { animation-delay: 0.7s; }
-.var-letter:nth-child(3) { animation-delay: 0.85s; }
+    .btn-label {
+        color: #e8e8e8;
+        font-size: 18px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+    }
 
-/* Elementos decorativos */
-.qt-left, .qt-right {
-  position: absolute; top: 10px; color: #fff;
-  font-size: 60px; font-weight: bold; line-height: 1;
-  opacity: 0; transform: scale(2);
-  animation: quickFade 0.3s ease-out 0.95s forwards;
-}
-.qt-left { left: -18px; }
-.qt-right { right: -18px; }
+    /* FUNDO DINÂMICO DOS JOGOS */
+    .game-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('assets/images/fundo-dirt5.jpg') no-repeat center center;
+        background-size: cover;
+        z-index: 0;
+        transition: background-image 0.6s ease-in-out;
+        opacity: 0;
+        transition: opacity 0.8s ease, background-image 0.6s ease-in-out;
+    }
 
-.bracket-l {
-  position: absolute; bottom: 5px; left: -55px;
-  width: 45px; height: 0;
-  border-left: 6px solid #fff; border-bottom: 6px solid #fff;
-  border-radius: 0 0 0 20px;
-  opacity: 0;
-  animation: drawBracketL 0.4s ease-out 1.05s forwards;
-}
-.bracket-r {
-  position: absolute; bottom: 5px; right: -55px;
-  width: 45px; height: 0;
-  border-right: 6px solid #fff; border-bottom: 6px solid #fff;
-  border-radius: 0 0 20px 0;
-  opacity: 0;
-  animation: drawBracketR 0.4s ease-out 1.15s forwards;
-}
+    .game-bg.visible {
+        opacity: 1;
+    }
 
-.arrow-curve {
-  position: absolute; top: 5px; right: -45px;
-  width: 0; height: 0;
-  border-top: 8px solid #fff; border-right: 8px solid #fff;
-  border-radius: 0 22px 0 0;
-  opacity: 0;
-  animation: drawArrow 0.45s ease-out 1.25s forwards;
-}
-.arrow-tip {
-  position: absolute; right: -12px; top: 78px;
-  width: 0; height: 0;
-  border-top: 12px solid transparent;
-  border-bottom: 12px solid transparent;
-  border-left: 0 solid #fff;
-  opacity: 0;
-  animation: tipShow 0.3s ease-out 1.4s forwards;
-}
+    .bg-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.1) 100%);
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 0.8s ease;
+    }
 
-/* ========== KEYFRAMES ========== */
-@keyframes pulseGlow {
-  0%,100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-@keyframes logoSpinIn {
-  to { opacity: 1; transform: scale(1) rotate(0deg); }
-}
-@keyframes floatBounce {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-@keyframes glowPulse {
-  0%,100% { filter: drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
-  50% { filter: drop-shadow(0 0 18px rgba(255,255,255,0.8)); }
-}
-@keyframes lineGrow {
-  to { height: 50px; opacity: 0.7; }
-}
-@keyframes flicker {
-  0%,100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-@keyframes mideaBurst {
-  to { transform: translateX(0) skewX(0); opacity: 1; box-shadow: 0 0 25px rgba(0,144,255,0.5); }
-}
-@keyframes logoBrightPulse {
-  0%,100% { filter: brightness(1); }
-  50% { filter: brightness(1.3); }
-}
-@keyframes textPop {
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes letterBurst {
-  0% { opacity: 0; transform: translateY(40px) scale(0.7); text-shadow: 0 0 30px rgba(255,255,255,0); }
-  60% { transform: translateY(-8px) scale(1.08); text-shadow: 0 0 25px rgba(255,255,255,0.7); }
-  100% { opacity: 1; transform: translateY(0) scale(1); text-shadow: 0 0 12px rgba(255,255,255,0.4); }
-}
-@keyframes quickFade {
-  to { opacity: 1; transform: scale(1); }
-}
-@keyframes drawBracketL {
-  to { opacity: 1; height: 75px; }
-}
-@keyframes drawBracketR {
-  to { opacity: 1; height: 75px; }
-}
-@keyframes drawArrow {
-  to { opacity: 1; width: 85px; height: 85px; }
-}
-@keyframes tipShow {
-  to { opacity: 1; border-left-width: 20px; }
-}
-</style>
+    .bg-overlay.visible {
+        opacity: 1;
+    }
+
+    header {
+        position: relative;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 50px;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.8s ease;
+    }
+
+    header.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    header .left-menu {
+        display: flex;
+        gap: 50px;
+        align-items: center;
+    }
+
+    header .left-menu a {
+        color: #aaaaaa;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 500;
+        transition: all 0.25s ease;
+        position: relative;
+    }
+
+    header .left-menu a:hover {
+        color: #ffffff;
+    }
+
+    header .left-menu a:first-child {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    header .left-menu a:first-child::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 2px;
+        background: #ffffff;
+        margin-top: 6px;
+        border-radius: 2px;
+    }
+
+    header .right-menu {
+        display: flex;
+        gap: 28px;
+        align-items: center;
+    }
+
+    header .right-menu a {
+        color: #aaaaaa;
+        font-size: 20px;
+        text-decoration: none;
+        transition: color 0.25s ease;
+    }
+
+    header .right-menu a:hover {
+        color: #ffffff;
+    }
+
+    header .profile-pic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #444;
+        transition: transform 0.2s ease;
+    }
+
+    header .profile-pic:hover {
+        transform: scale(1.05);
+    }
+
+    header .time {
+        font-size: 18px;
+        color: #ffffff;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .carousel-viewport {
+        position: absolute;
+        top: 120px;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease 0.1s;
+    }
+
+    .carousel-viewport.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .games-carousel {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-left: 50px;
+        transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+        pointer-events: auto;
+    }
+
+    .game-cover {
+        flex-shrink: 0;
+        width: 100px;
+        height: 130px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        opacity: 0.5;
+        transform: scale(0.85);
+        cursor: pointer;
+    }
+
+    .game-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .game-cover:hover {
+        opacity: 0.8;
+        transform: scale(0.92);
+    }
+
+    .game-cover.active {
+        width: 130px;
+        height: 170px;
+        border-color: #ffffff;
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 25px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .game-name {
+        position: absolute;
+        top: 310px;
+        left: 50px;
+        font-size: 22px;
+        font-weight: 600;
+        color: #ffffff;
+        z-index: 10;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        opacity: 0;
+        transform: translateY(15px);
+        transition: all 0.8s ease 0.2s;
+    }
+
+    .game-name.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .play-button {
+        position: absolute;
+        bottom: 130px;
+        left: 50px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        opacity: 0;
+        transform: translateY(15px);
+        transition: all 0.8s ease 0.3s;
+    }
+
+    .play-button.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .play-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.25s ease;
+        width: 200px;
+        height: 50px;
+    }
+
+    .play-btn svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .play-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .more-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        width: 50px;
+        height: 50px;
+        transition: transform 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .more-btn svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .more-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .side-info {
+        position: absolute;
+        right: 50px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+        transition: all 0.8s ease 0.4s;
+    }
+
+    .side-info.visible {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+
+    .game-card {
+        width: 200px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .game-card img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .game-card .labels {
+        padding: 10px;
+    }
+
+    .game-card .tag {
+        background: #ffffff;
+        color: #000000;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 6px;
+        display: inline-block;
+        margin-bottom: 6px;
+        border-radius: 2px;
+    }
+
+    .game-card .tag-blue {
+        background: #0066cc;
+        color: #ffffff;
+        margin-left: 4px;
+    }
+
+    .progress-box {
+        background: rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        width: 200px;
+        backdrop-filter: blur(10px);
+    }
+
+    .progress-item {
+        text-align: center;
+        flex: 1;
+    }
+
+    .progress-label {
+        font-size: 12px;
+        color: #999999;
+        margin-bottom: 5px;
+    }
+
+    .progress-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .game-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000000;
+        z-index: 99999;
+        display: none;
+        flex-direction: column;
+    }
+
+    .game-modal.active {
+        display: flex;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #e2231a;
+        border: none;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(226, 35, 26, 0.5);
+        transition: transform 0.2s;
+    }
+
+    .close-btn:hover {
+        transform: scale(1.15);
+    }
+
+    .fullscreen-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+        flex: 1;
+        allow="autoplay; fullscreen; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox";
+    }
+
+    @media (max-width: 768px) {
+        header {
+            padding: 15px 20px;
+        }
+        header .left-menu {
+            gap: 25px;
+        }
+        header .left-menu a {
+            font-size: 15px;
+        }
+        .games-carousel {
+            padding-left: 20px;
+            gap: 15px;
+        }
+        .game-cover {
+            width: 70px;
+            height: 95px;
+        }
+        .game-cover.active {
+            width: 90px;
+            height: 120px;
+        }
+        .game-name {
+            left: 20px;
+            top: 230px;
+            font-size: 16px;
+        }
+        .play-button {
+            left: 20px;
+            bottom: 80px;
+        }
+        .play-btn {
+            width: 160px;
+            height: 44px;
+        }
+        .more-btn {
+            width: 44px;
+            height: 44px;
+        }
+        .side-info {
+            right: 20px;
+            transform: translateY(-50%) scale(0.85);
+        }
+    }
+  </style>
 </head>
 <body>
 
-<div class="var-screen">
-  <div class="screen-glow"></div>
-
-  <!-- Topo: TROFÉU + CBF -->
-  <div class="top-logos">
-    <img src="assets/imagens/trofeu.png" alt="Troféu" class="trophy-logo">
-    <div class="divider"></div>
-    <img src="assets/imagens/cbf-escudo.png" alt="CBF" class="cbf-shield">
-  </div>
-
-  <!-- MIDEA -->
-  <div class="midea-box">
-    <img src="assets/imagens/midea-logo.png" alt="Midea" class="midea-logo">
-  </div>
-
-  <!-- CBF + VAR -->
-  <div class="var-group">
-    <div class="cbf-label">CBF</div>
-    <div class="var-text-wrapper">
-      <span class="qt-left">"</span>
-      <div class="bracket-l"></div>
-      <span class="var-letter">V</span>
-      <span class="var-letter">A</span>
-      <span class="var-letter">R</span>
-      <span class="qt-right">"</span>
-      <div class="bracket-r"></div>
-      <div class="arrow-curve"></div>
-      <div class="arrow-tip"></div>
+  <!-- TELA INICIAL — só aparece no começo -->
+  <div class="start-screen" id="start-screen">
+    <div class="ps5-new-user" id="new-user-btn">
+      <div class="outer-ring">
+        <div class="circle-btn">
+          <span class="plus-icon">+</span>
+        </div>
+      </div>
+      <span class="btn-label">New User</span>
     </div>
   </div>
-</div>
+
+  <!-- INTERFACE PRINCIPAL — escondida no início -->
+  <div class="game-bg" id="game-bg"></div>
+  <div class="bg-overlay" id="bg-overlay"></div>
+
+  <header id="main-header">
+    <div class="left-menu">
+      <a href="#">Jogos</a>
+      <a href="#">Conteúdo Multimídia</a>
+    </div>
+    <div class="right-menu">
+      <a href="#"><i class="fas fa-search"></i></a>
+      <a href="#"><i class="fas fa-cog"></i></a>
+      <img src="assets/images/perfil.jpg" alt="Perfil" class="profile-pic">
+      <span class="time" id="hora-caceres">--:--</span>
+    </div>
+  </header>
+
+  <div class="carousel-viewport" id="carousel-viewport">
+    <div class="games-carousel" id="carousel">
+      <div class="game-cover" data-index="0">
+        <img src="assets/images/capa-demons-souls.jpg" alt="Demon's Souls">
+      </div>
+      <div class="game-cover" data-index="1">
+        <img src="assets/images/capa-like-a-dragon.jpg" alt="Like a Dragon">
+      </div>
+      <div class="game-cover active" data-index="2">
+        <img src="assets/images/capa-dirt5.jpg" alt="DIRT 5">
+      </div>
+      <div class="game-cover" data-index="3">
+        <img src="assets/images/capa-god-of-war.jpg" alt="God of War">
+      </div>
+      <div class="game-cover" data-index="4">
+        <img src="assets/images/capa-spider-man.jpg" alt="Spider-Man">
+      </div>
+      <div class="game-cover" data-index="5">
+        <img src="assets/images/capa-horizon.jpg" alt="Horizon">
+      </div>
+      <div class="game-cover" data-index="6">
+        <img src="assets/images/capa-ratchet-clank.jpg" alt="Ratchet & Clank">
+      </div>
+      <div class="game-cover" data-index="7">
+        <img src="assets/images/capa-rocket-goal.jpg" alt="Rocket Goal">
+      </div>
+      <div class="game-cover" data-index="8">
+        <img src="assets/images/capa-gta-v.jpg" alt="GTA V">
+      </div>
+      <div class="game-cover" data-index="9">
+        <img src="assets/images/capa-fnaf.jpg" alt="Five Nights At Freddy's">
+      </div>
+      <div class="game-cover" data-index="10">
+        <img src="assets/images/capa-eaglercraft.jpg" alt="Eaglercraft 1.20.6">
+      </div>
+    </div>
+  </div>
+
+  <div class="game-name" id="game-title">DIRT 5™ | PS5</div>
+
+  <div class="play-button" id="play-button-container">
+    <button class="play-btn" id="play-game-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+        <rect x="0" y="0" width="320" height="80" rx="40" fill="#00439C" />
+        <text x="50%" y="55%" 
+              font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+              font-size="26" 
+              font-weight="bold" 
+              fill="#FFFFFF" 
+              text-anchor="middle" 
+              dominant-baseline="middle">
+          Jogar
+        </text>
+      </svg>
+    </button>
+    <button class="more-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+        <circle cx="40" cy="40" r="38" fill="#00439C" />
+        <circle cx="26" cy="40" r="4" fill="#FFFFFF" />
+        <circle cx="40" cy="40" r="4" fill="#FFFFFF" />
+        <circle cx="54" cy="40" r="4" fill="#FFFFFF" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="game-modal" id="game-modal">
+    <button class="close-btn" id="close-modal-btn">×</button>
+    <iframe 
+      src="" 
+      class="fullscreen-iframe"
+      id="game-iframe"
+      allowfullscreen
+      allow="autoplay; fullscreen; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      scrolling="no">
+    </iframe>
+  </div>
+
+  <div class="side-info" id="side-info-container">
+    <div class="game-card">
+      <img src="assets/images/capa-dirt5.jpg" alt="DIRT 5" id="side-cover">
+      <div class="labels">
+        <span class="tag">Jogo Completo</span>
+        <span class="tag tag-blue">Atualização PS5 grátis</span>
+      </div>
+    </div>
+    <div class="progress-box">
+      <div class="progress-item">
+        <div class="progress-label">Progresso</div>
+        <div class="progress-value" id="progress-val">6%</div>
+      </div>
+      <div class="progress-item">
+        <div class="progress-label">Conquistas</div>
+        <div class="progress-value" id="trophies-val">3/21</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function atualizarHoraCaceres() {
+        const agora = new Date();
+        const hora = agora.toLocaleTimeString('pt-BR', {
+            timeZone: 'America/Cuiaba',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        document.getElementById('hora-caceres').textContent = hora;
+    }
+    atualizarHoraCaceres();
+    setInterval(atualizarHoraCaceres, 60000);
+
+    const jogos = [
+        { nome: "Demon's Souls™ | PS5", fundo: "assets/images/fundo-demons-souls.jpg", capa: "assets/images/capa-demons-souls.jpg", progresso: "12%", conquistas: "8/48" },
+        { nome: "Like a Dragon™ | PS5", fundo: "assets/images/fundo-like-a-dragon.jpg", capa: "assets/images/capa-like-a-dragon.jpg", progresso: "45%", conquistas: "15/35" },
+        { nome: "DIRT 5™ | PS5", fundo: "assets/images/fundo-dirt5.jpg", capa: "assets/images/capa-dirt5.jpg", progresso: "6%", conquistas: "3/21" },
+        { nome: "God of War™ | PS5", fundo: "assets/images/fundo-god-of-war.jpg", capa: "assets/images/capa-god-of-war.jpg", progresso: "78%", conquistas: "24/36" },
+        { nome: "Marvel's Spider-Man™ | PS5", fundo: "assets/images/fundo-spider-man.jpg", capa: "assets/images/capa-spider-man.jpg", progresso: "32%", conquistas: "12/42", iframeUrl: "https://jogos101.com/g/spider-man-web-shooter/embed" },
+        { nome: "Horizon Forbidden West™ | PS5", fundo: "assets/images/fundo-horizon.jpg", capa: "assets/images/capa-horizon.jpg", progresso: "55%", conquistas: "18/58" },
+        { nome: "Ratchet & Clank™ | PS5", fundo: "assets/images/fundo-ratchet-clank.jpg", capa: "assets/images/capa-ratchet-clank.jpg", progresso: "20%", conquistas: "7/32" },
+        { nome: "Rocket Goal.io | Jogo", fundo: "assets/images/fundo-rocket-goal.jpg", capa: "assets/images/capa-rocket-goal.jpg", progresso: "—", conquistas: "—", iframeUrl: "https://rocketgoal.io" },
+        { 
+          nome: "Grand Theft Auto V™ | PS5", 
+          fundo: "assets/images/fundo-gta-v.jpg", 
+          capa: "assets/images/capa-gta-v.jpg", 
+          progresso: "—", 
+          conquistas: "—", 
+          iframeUrl: "https://www.youtube.com/embed/UWzV0AFXukI?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&disablekb=1&fs=1&iv_load_policy=3" 
+        },
+        { 
+          nome: "Five Nights At Freddy's™ | Jogo", 
+          fundo: "assets/images/fundo-fnaf.jpg", 
+          capa: "assets/images/capa-fnaf.jpg", 
+          progresso: "—", 
+          conquistas: "—", 
+          iframeUrl: "https://fivenightsatfreddys-fnaf.io/fnaf-1-unblocked/" 
+        },
+        { 
+          nome: "Eaglercraft™ | 1.20.6", 
+          fundo: "assets/images/fundo-eaglercraft.jpg", 
+          capa: "assets/images/capa-eaglercraft.jpg", 
+          progresso: "—", 
+          conquistas: "—", 
+          iframeUrl: "https://eymenwsmc.site/120/?v=20260824-5430efd6" 
+        }
+    ];
+
+    const covers = document.querySelectorAll('.game-cover');
+    const carousel = document.getElementById('carousel');
+    const gameBg = document.getElementById('game-bg');
+    const gameTitle = document.getElementById('game-title');
+    const sideCover = document.getElementById('side-cover');
+    const progressVal = document.getElementById('progress-val');
+    const trophiesVal = document.getElementById('trophies-val');
+    const playBtn = document.getElementById('play-game-btn');
+    const modal = document.getElementById('game-modal');
+    const closeBtn = document.getElementById('close-modal-btn');
+    const gameIframe = document.getElementById('game-iframe');
+    
+    let currentIndex = 2;
+
+    function calcularDeslocamento() {
+        const capaLargura = covers[0].offsetWidth + 20;
+        return 50 - (currentIndex * capaLargura);
+    }
+
+    function atualizarCarrossel() {
+        covers.forEach((cover, i) => {
+            cover.classList.remove('active');
+            if (i === currentIndex) cover.classList.add('active');
+        });
+        carousel.style.transform = `translateX(${calcularDeslocamento()}px)`;
+        const jogo = jogos[currentIndex];
+        gameBg.style.backgroundImage = `url('${jogo.fundo}')`;
+        gameTitle.textContent = jogo.nome;
+        sideCover.src = jogo.capa;
+        progressVal.textContent = jogo.progresso;
+        trophiesVal.textContent = jogo.conquistas;
+    }
+
+    covers.forEach((cover, i) => {
+        cover.addEventListener('click', () => {
+            currentIndex = i;
+            atualizarCarrossel();
+        });
+    });
+
+    playBtn.addEventListener('click', () => {
+        const jogoAtual = jogos[currentIndex];
+        if (jogoAtual.iframeUrl) {
+            gameIframe.src = jogoAtual.iframeUrl;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        } else {
+            alert(`Iniciando ${jogoAtual.nome}...`);
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        gameIframe.src = "";
+    });
+
+    // === AÇÃO AO CLICAR NO BOTÃO NEW USER ===
+    document.getElementById('new-user-btn').addEventListener('click', () => {
+        // Esconde a tela inicial
+        document.getElementById('start-screen').classList.add('hidden');
+        
+        // Mostra a interface principal com animação em cascata
+        setTimeout(() => {
+            document.getElementById('game-bg').classList.add('visible');
+            document.getElementById('bg-overlay').classList.add('visible');
+            document.getElementById('main-header').classList.add('visible');
+            document.getElementById('carousel-viewport').classList.add('visible');
+            document.getElementById('game-title').classList.add('visible');
+            document.getElementById('play-button-container').classList.add('visible');
+            document.getElementById('side-info-container').classList.add('visible');
+            
+            // Inicializa o carrossel
+            setTimeout(atualizarCarrossel, 100);
+        }, 300);
+    });
+
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+    document.addEventListener('touchend', e => {
+        const touchEndX = e.changedTouches[0].clientX;
+        if (touchStartX - touchEndX > 50) {
+            currentIndex = (currentIndex + 1) % jogos.length;
+            atualizarCarrossel();
+        } else if (touchEndX - touchStartX > 50) {
+            currentIndex = (currentIndex - 1 + jogos.length) % jogos.length;
+            atualizarCarrossel();
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') {
+            currentIndex = (currentIndex + 1) % jogos.length;
+            atualizarCarrossel();
+        } else if (e.key === 'ArrowLeft') {
+            currentIndex = (currentIndex - 1 + jogos.length) % jogos.length;
+            atualizarCarrossel();
+        } else if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeBtn.click();
+        }
+    });
+
+    window.addEventListener('resize', atualizarCarrossel);
+  </script>
 
 </body>
 </html>
+
