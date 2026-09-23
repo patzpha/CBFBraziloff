@@ -1,825 +1,503 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PlayStation 5</title>
   <script src="https://kit.fontawesome.com/0c87a70838.js"></script>
   <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #000; min-height: 100vh; color: #fff; overflow: hidden; }
 
-    body {
-        background: #000;
-        min-height: 100vh;
-        color: #ffffff;
-        overflow: hidden;
+    /* BACKGROUND */
+    .bg-layer {
+      position: fixed; inset: 0;
+      background: url('assets/gifs/gif-fundo-ps5.gif') no-repeat center center fixed;
+      background-size: cover; z-index: 1; transition: opacity 0.8s ease;
     }
+    .bg-layer.fade-out { opacity: 0; }
 
-    /* TELA INICIAL — fundo GIF + botão */
-    .start-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url('assets/gifs/gif-fundo-ps5.gif') no-repeat center center fixed;
-        background-size: cover;
-        z-index: 999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.6s ease, visibility 0.6s ease;
+    /* SELECTION SCREEN */
+    .select-screen {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      transition: opacity 0.6s ease;
     }
+    .select-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .select-title { font-size: 22px; color: #ddd; margin-bottom: 60px; }
+    .accounts-row { display: flex; align-items: center; gap: 50px; }
 
-    .start-screen.hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
+    /* PROFILE CIRCLE */
+    .user-account {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer; transition: transform 0.3s ease;
     }
+    .user-account:hover { transform: scale(1.08); }
+    .avatar-ring {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: linear-gradient(135deg, #6a48ff, #00d4ff); padding: 3px;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .avatar-img {
+      width: 134px; height: 134px; border-radius: 50%;
+      object-fit: cover; background: #1a1a1a;
+    }
+    .user-name { font-size: 18px; color: #fff; }
 
-    .ps5-new-user {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        transition: transform 0.3s ease;
+    /* NEW USER BUTTON */
+    .new-user-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      cursor: pointer; transition: transform 0.3s ease;
     }
+    .new-user-btn:hover { transform: scale(1.08); }
+    .plus-circle {
+      width: 140px; height: 140px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); display: flex;
+      justify-content: center; align-items: center;
+      font-size: 48px; color: #aaa; transition: all 0.3s ease;
+    }
+    .new-user-btn:hover .plus-circle { background: rgba(255,255,255,0.2); color: #fff; }
+    .new-user-text { font-size: 18px; color: #aaa; }
 
-    .outer-ring {
-        width: 104px;
-        height: 104px;
-        border-radius: 50%;
-        border: 3px solid #000000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.25s ease;
-        background: rgba(42, 42, 44, 0.3);
+    /* CREATE SCREEN */
+    .create-screen {
+      position: fixed; inset: 0; z-index: 20;
+      display: none; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.7); opacity: 0; transition: opacity 0.5s ease;
     }
+    .create-screen.active { display: flex; opacity: 1; }
+    .create-box {
+      display: flex; flex-direction: column; align-items: center; gap: 25px;
+      padding: 40px 50px; background: rgba(20,20,25,0.95);
+      border-radius: 16px; border: 1px solid #333;
+    }
+    .back-link { align-self: flex-start; color: #00a8ff; cursor: pointer; text-decoration: none; }
+    .photo-picker { cursor: pointer; }
+    .photo-ring {
+      width: 130px; height: 130px; border-radius: 50%; border: 3px solid #444;
+      display: flex; justify-content: center; align-items: center;
+      background: #222; overflow: hidden; transition: border-color 0.3s ease;
+    }
+    .photo-picker:hover .photo-ring { border-color: #00d06c; }
+    .photo-inner {
+      width: 120px; height: 120px; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      overflow: hidden;
+    }
+    .photo-inner img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .photo-inner.has-img .ph-icon { display: none; }
+    .photo-inner.has-img img { display: block; }
+    .ph-icon { font-size: 40px; color: #777; }
+    #file-input, #change-photo-input { display: none; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label { font-size: 14px; color: #aaa; }
+    .field-input {
+      width: 280px; padding: 12px 15px; font-size: 16px;
+      border: 2px solid #333; border-radius: 8px;
+      background: #1a1a1a; color: #fff; outline: none;
+    }
+    .save-btn {
+      width: 280px; padding: 13px; font-size: 18px; font-weight: 600;
+      border: none; border-radius: 8px; background: #00a84f;
+      color: #fff; cursor: pointer; transition: all 0.3s ease;
+    }
+    .save-btn:hover { background: #00c05c; transform: scale(1.03); }
 
-    .circle-btn {
-        width: 88px;
-        height: 88px;
-        border-radius: 50%;
-        background: #2a2a2c;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: background 0.25s ease;
+    /* PS5 INTERFACE */
+    .ps5-main {
+      position: fixed; inset: 0; z-index: 5;
+      opacity: 0; pointer-events: none; transition: opacity 0.8s ease;
     }
-
-    .ps5-new-user:hover .outer-ring {
-        transform: scale(1.05);
-    }
-    .ps5-new-user:hover .circle-btn {
-        background: #38383a;
-    }
-
-    .plus-icon {
-        color: #ffffff;
-        font-size: 40px;
-        font-weight: 300;
-        line-height: 1;
-    }
-
-    .btn-label {
-        color: #e8e8e8;
-        font-size: 18px;
-        font-weight: 400;
-        letter-spacing: 0.5px;
-    }
-
-    /* FUNDO DINÂMICO DOS JOGOS */
+    .ps5-main.visible { opacity: 1; pointer-events: auto; }
     .game-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url('assets/images/fundo-dirt5.jpg') no-repeat center center;
-        background-size: cover;
-        z-index: 0;
-        transition: background-image 0.6s ease-in-out;
-        opacity: 0;
-        transition: opacity 0.8s ease, background-image 0.6s ease-in-out;
+      position: absolute; inset: 0;
+      background: url('assets/images/fundo-fnaf.jpg') no-repeat center center;
+      background-size: cover;
     }
-
-    .game-bg.visible {
-        opacity: 1;
-    }
-
     .bg-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.1) 100%);
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 0.8s ease;
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,.75) 0%, rgba(0,0,0,.25) 35%, rgba(0,0,0,.1) 100%);
     }
-
-    .bg-overlay.visible {
-        opacity: 1;
-    }
-
     header {
-        position: relative;
-        z-index: 100;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 25px 50px;
-        opacity: 0;
-        transform: translateY(-20px);
-        transition: all 0.8s ease;
+      position: relative; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 25px 50px;
     }
-
-    header.visible {
-        opacity: 1;
-        transform: translateY(0);
+    .menu-left { display: flex; gap: 50px; }
+    .menu-left a {
+      color: #aaa; text-decoration: none; font-size: 18px;
     }
-
-    header .left-menu {
-        display: flex;
-        gap: 50px;
-        align-items: center;
+    .menu-left a:first-child { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 6px; }
+    .menu-right { display: flex; gap: 25px; align-items: center; }
+    .menu-right a { color: #aaa; font-size: 20px; text-decoration: none; }
+    
+    /* ✅ FOTO DO CANTO — SEM perfil.jpg! */
+    .mini-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      object-fit: cover; border: 2px solid transparent;
+      cursor: pointer; transition: all 0.3s ease;
+      
+      /* Foto padrão — sem arquivo! */
+      background: #2a2a2a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: #888;
     }
-
-    header .left-menu a {
-        color: #aaaaaa;
-        text-decoration: none;
-        font-size: 18px;
-        font-weight: 500;
-        transition: all 0.25s ease;
-        position: relative;
+    /* Quando tem foto escolhida — mostra a sua */
+    .mini-avatar.has-photo {
+      background: none;
+      border-color: rgba(255,255,255,0.3);
     }
+    .mini-avatar:hover { box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+    
+    .time-text { font-size: 18px; color: #fff; }
 
-    header .left-menu a:hover {
-        color: #ffffff;
-    }
-
-    header .left-menu a:first-child {
-        color: #ffffff;
-        font-weight: 600;
-    }
-
-    header .left-menu a:first-child::after {
-        content: '';
-        display: block;
-        width: 100%;
-        height: 2px;
-        background: #ffffff;
-        margin-top: 6px;
-        border-radius: 2px;
-    }
-
-    header .right-menu {
-        display: flex;
-        gap: 28px;
-        align-items: center;
-    }
-
-    header .right-menu a {
-        color: #aaaaaa;
-        font-size: 20px;
-        text-decoration: none;
-        transition: color 0.25s ease;
-    }
-
-    header .right-menu a:hover {
-        color: #ffffff;
-    }
-
-    header .profile-pic {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #444;
-        transition: transform 0.2s ease;
-    }
-
-    header .profile-pic:hover {
-        transform: scale(1.05);
-    }
-
-    header .time {
-        font-size: 18px;
-        color: #ffffff;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-    }
-
-    .carousel-viewport {
-        position: absolute;
-        top: 120px;
-        left: 0;
-        width: 100%;
-        overflow: hidden;
-        z-index: 10;
-        pointer-events: none;
-        opacity: 0;
-        transform: translateY(30px);
-        transition: all 0.8s ease 0.1s;
-    }
-
-    .carousel-viewport.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .games-carousel {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        padding-left: 50px;
-        transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-        pointer-events: auto;
-    }
-
-    .game-cover {
-        flex-shrink: 0;
-        width: 100px;
-        height: 130px;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 2px solid transparent;
-        transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-        opacity: 0.5;
-        transform: scale(0.85);
-        cursor: pointer;
-    }
-
-    .game-cover img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .game-cover:hover {
-        opacity: 0.8;
-        transform: scale(0.92);
-    }
-
-    .game-cover.active {
-        width: 130px;
-        height: 170px;
-        border-color: #ffffff;
-        opacity: 1;
-        transform: scale(1);
-        box-shadow: 0 0 25px rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    .game-name {
-        position: absolute;
-        top: 310px;
-        left: 50px;
-        font-size: 22px;
-        font-weight: 600;
-        color: #ffffff;
-        z-index: 10;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-        opacity: 0;
-        transform: translateY(15px);
-        transition: all 0.8s ease 0.2s;
-    }
-
-    .game-name.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .play-button {
-        position: absolute;
-        bottom: 130px;
-        left: 50px;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        opacity: 0;
-        transform: translateY(15px);
-        transition: all 0.8s ease 0.3s;
-    }
-
-    .play-button.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .play-btn {
-        background: transparent;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        transition: transform 0.25s ease;
-        width: 200px;
-        height: 50px;
-    }
-
-    .play-btn svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-
-    .play-btn:hover {
-        transform: scale(1.05);
-    }
-
-    .more-btn {
-        background: transparent;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        width: 50px;
-        height: 50px;
-        transition: transform 0.25s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .more-btn svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-
-    .more-btn:hover {
-        transform: scale(1.1);
-    }
-
-    .side-info {
-        position: absolute;
-        right: 50px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        opacity: 0;
-        transform: translateY(-50%) translateX(20px);
-        transition: all 0.8s ease 0.4s;
-    }
-
-    .side-info.visible {
-        opacity: 1;
-        transform: translateY(-50%) translateX(0);
-    }
-
+    .carousel-wrap { position: absolute; top: 120px; left: 0; width: 100%; overflow: hidden; }
+    .games-track { display: flex; gap: 20px; padding-left: 50px; transition: transform 0.5s ease; }
     .game-card {
-        width: 200px;
-        border-radius: 8px;
-        overflow: hidden;
-        background: rgba(0,0,0,0.5);
-        border: 1px solid rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
+      flex-shrink: 0; width: 100px; height: 130px; border-radius: 8px;
+      overflow: hidden; border: 2px solid transparent;
+      opacity: 0.5; transform: scale(0.85); cursor: pointer; transition: all 0.3s ease;
     }
-
-    .game-card img {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
+    .game-card.active { width: 130px; height: 170px; border-color: #fff; opacity: 1; transform: scale(1); }
+    .game-card img { width: 100%; height: 100%; object-fit: cover; }
+    .game-title { position: absolute; top: 310px; left: 50px; font-size: 22px; font-weight: 600; }
+    .play-area { position: absolute; bottom: 130px; left: 50px; display: flex; gap: 15px; }
+    .play-btn {
+      width: 200px; height: 50px; border-radius: 25px;
+      background: #00439c; border: none; color: #fff;
+      font-size: 20px; font-weight: bold; cursor: pointer;
     }
-
-    .game-card .labels {
-        padding: 10px;
+    .more-btn {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #00439c; border: none; color: #fff;
+      font-size: 24px; cursor: pointer;
     }
-
-    .game-card .tag {
-        background: #ffffff;
-        color: #000000;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 3px 6px;
-        display: inline-block;
-        margin-bottom: 6px;
-        border-radius: 2px;
+    .side-panel {
+      position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 15px;
     }
-
-    .game-card .tag-blue {
-        background: #0066cc;
-        color: #ffffff;
-        margin-left: 4px;
+    .side-game-card {
+      width: 200px; border-radius: 8px; overflow: hidden;
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
     }
-
+    .side-game-card img { width: 100%; height: 120px; object-fit: cover; }
+    .side-info { padding: 10px; }
+    .tag {
+      display: inline-block; background: #fff; color: #000;
+      font-size: 11px; font-weight: 600; padding: 2px 6px;
+      border-radius: 2px; margin-bottom: 5px;
+    }
+    .tag-blue { background: #0066cc; color: #fff; margin-left: 4px; }
     .progress-box {
-        background: rgba(0,0,0,0.5);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 8px;
-        padding: 12px 15px;
-        display: flex;
-        justify-content: space-between;
-        width: 200px;
-        backdrop-filter: blur(10px);
+      display: flex; justify-content: space-between; width: 200px;
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 12px;
     }
-
-    .progress-item {
-        text-align: center;
-        flex: 1;
+    .progress-col { text-align: center; }
+    .progress-label { font-size: 12px; color: #999; margin-bottom: 4px; }
+    .progress-val { font-size: 18px; font-weight: 600; }
+    .logout-tip {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      font-size: 13px; color: #666;
     }
-
-    .progress-label {
-        font-size: 12px;
-        color: #999999;
-        margin-bottom: 5px;
-    }
-
-    .progress-value {
-        font-size: 18px;
-        font-weight: 600;
-        color: #ffffff;
-    }
-
-    .game-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #000000;
-        z-index: 99999;
-        display: none;
-        flex-direction: column;
-    }
-
-    .game-modal.active {
-        display: flex;
-    }
-
-    .close-btn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: #e2231a;
-        border: none;
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        cursor: pointer;
-        z-index: 100000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 15px rgba(226, 35, 26, 0.5);
-        transition: transform 0.2s;
-    }
-
-    .close-btn:hover {
-        transform: scale(1.15);
-    }
-
-    .fullscreen-iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-        display: block;
-        flex: 1;
-        allow="autoplay; fullscreen; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox";
-    }
-
-    @media (max-width: 768px) {
-        header {
-            padding: 15px 20px;
-        }
-        header .left-menu {
-            gap: 25px;
-        }
-        header .left-menu a {
-            font-size: 15px;
-        }
-        .games-carousel {
-            padding-left: 20px;
-            gap: 15px;
-        }
-        .game-cover {
-            width: 70px;
-            height: 95px;
-        }
-        .game-cover.active {
-            width: 90px;
-            height: 120px;
-        }
-        .game-name {
-            left: 20px;
-            top: 230px;
-            font-size: 16px;
-        }
-        .play-button {
-            left: 20px;
-            bottom: 80px;
-        }
-        .play-btn {
-            width: 160px;
-            height: 44px;
-        }
-        .more-btn {
-            width: 44px;
-            height: 44px;
-        }
-        .side-info {
-            right: 20px;
-            transform: translateY(-50%) scale(0.85);
-        }
-    }
+    .logout-tip span { color: #00a8ff; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- TELA INICIAL — só aparece no começo -->
-  <div class="start-screen" id="start-screen">
-    <div class="ps5-new-user" id="new-user-btn">
-      <div class="outer-ring">
-        <div class="circle-btn">
-          <span class="plus-icon">+</span>
+  <!-- BACKGROUND -->
+  <div class="bg-layer" id="bg-layer"></div>
+
+  <!-- SELECTION SCREEN -->
+  <div class="select-screen" id="select-screen">
+    <h1 class="select-title">Who's using the controller?</h1>
+    <div class="accounts-row" id="accounts-row"></div>
+  </div>
+
+  <!-- CREATE SCREEN -->
+  <div class="create-screen" id="create-screen">
+    <div class="create-box">
+      <span class="back-link" id="back-to-select">← Back</span>
+      <label class="photo-picker" for="file-input">
+        <div class="photo-ring">
+          <div class="photo-inner" id="preview-holder">
+            <span class="ph-icon">+</span>
+            <img id="preview-img" alt="Profile photo">
+          </div>
+        </div>
+      </label>
+      <input type="file" id="file-input" accept="image/*">
+      <div class="field-group">
+        <label class="field-label">Your name</label>
+        <input type="text" class="field-input" id="name-field" placeholder="Enter your name...">
+      </div>
+      <button class="save-btn" id="create-account-btn">OK</button>
+    </div>
+  </div>
+
+  <!-- PS5 INTERFACE -->
+  <div class="ps5-main" id="ps5-interface">
+    <div class="game-bg" id="game-bg"></div>
+    <div class="bg-overlay"></div>
+    <header>
+      <div class="menu-left">
+        <a href="#">Games</a>
+        <a href="#">Media</a>
+      </div>
+      <div class="menu-right">
+        <a href="#"><i class="fas fa-search"></i></a>
+        <a href="#"><i class="fas fa-cog"></i></a>
+        <!-- ✅ FOTO NO CANTO — CLICA PRA TROCAR! -->
+        <label for="change-photo-input" style="cursor:pointer; margin:0; padding:0;">
+          <div class="mini-avatar" id="current-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+        </label>
+        <input type="file" id="change-photo-input" accept="image/*">
+        <span class="time-text" id="clock">--:--</span>
+      </div>
+    </header>
+
+    <div class="carousel-wrap">
+      <div class="games-track" id="games-track">
+        <div class="game-card" data-index="0"><img src="assets/images/capa-gta.jpg" alt=""></div>
+        <div class="game-card" data-index="1"><img src="assets/images/capa-fnaf.jpg" alt=""></div>
+        <div class="game-card active" data-index="2"><img src="assets/images/capa-minecraft.jpg" alt=""></div>
+        <div class="game-card" data-index="3"><img src="assets/images/capa-dirt5.jpg" alt=""></div>
+        <div class="game-card" data-index="4"><img src="assets/images/capa-spiderman.jpg" alt=""></div>
+      </div>
+    </div>
+
+    <h2 class="game-title" id="game-title">Five Nights At Freddy's™</h2>
+
+    <div class="play-area">
+      <button class="play-btn" id="play-btn">Play</button>
+      <button class="more-btn">⋯</button>
+    </div>
+
+    <div class="side-panel">
+      <div class="side-game-card">
+        <img id="side-cover" src="assets/images/capa-fnaf.jpg" alt="">
+        <div class="side-info">
+          <span class="tag">Full Game</span>
+          <span class="tag tag-blue">Free PS5 Upgrade</span>
         </div>
       </div>
-      <span class="btn-label">New User</span>
-    </div>
-  </div>
-
-  <!-- INTERFACE PRINCIPAL — escondida no início -->
-  <div class="game-bg" id="game-bg"></div>
-  <div class="bg-overlay" id="bg-overlay"></div>
-
-  <header id="main-header">
-    <div class="left-menu">
-      <a href="#">Jogos</a>
-      <a href="#">Conteúdo Multimídia</a>
-    </div>
-    <div class="right-menu">
-      <a href="#"><i class="fas fa-search"></i></a>
-      <a href="#"><i class="fas fa-cog"></i></a>
-      <img src="assets/images/perfil.jpg" alt="Perfil" class="profile-pic">
-      <span class="time" id="hora-caceres">--:--</span>
-    </div>
-  </header>
-
-  <div class="carousel-viewport" id="carousel-viewport">
-    <div class="games-carousel" id="carousel">
-      <div class="game-cover" data-index="0">
-        <img src="assets/images/capa-demons-souls.jpg" alt="Demon's Souls">
-      </div>
-      <div class="game-cover" data-index="1">
-        <img src="assets/images/capa-like-a-dragon.jpg" alt="Like a Dragon">
-      </div>
-      <div class="game-cover active" data-index="2">
-        <img src="assets/images/capa-dirt5.jpg" alt="DIRT 5">
-      </div>
-      <div class="game-cover" data-index="3">
-        <img src="assets/images/capa-god-of-war.jpg" alt="God of War">
-      </div>
-      <div class="game-cover" data-index="4">
-        <img src="assets/images/capa-spider-man.jpg" alt="Spider-Man">
-      </div>
-      <div class="game-cover" data-index="5">
-        <img src="assets/images/capa-horizon.jpg" alt="Horizon">
-      </div>
-      <div class="game-cover" data-index="6">
-        <img src="assets/images/capa-ratchet-clank.jpg" alt="Ratchet & Clank">
-      </div>
-      <div class="game-cover" data-index="7">
-        <img src="assets/images/capa-rocket-goal.jpg" alt="Rocket Goal">
-      </div>
-      <div class="game-cover" data-index="8">
-        <img src="assets/images/capa-gta-v.jpg" alt="GTA V">
-      </div>
-      <div class="game-cover" data-index="9">
-        <img src="assets/images/capa-fnaf.jpg" alt="Five Nights At Freddy's">
-      </div>
-      <div class="game-cover" data-index="10">
-        <img src="assets/images/capa-eaglercraft.jpg" alt="Eaglercraft 1.20.6">
+      <div class="progress-box">
+        <div class="progress-col">
+          <div class="progress-label">Progress</div>
+          <div class="progress-val">—</div>
+        </div>
+        <div class="progress-col">
+          <div class="progress-label">Trophies</div>
+          <div class="progress-val">—</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="game-name" id="game-title">DIRT 5™ | PS5</div>
-
-  <div class="play-button" id="play-button-container">
-    <button class="play-btn" id="play-game-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
-        <rect x="0" y="0" width="320" height="80" rx="40" fill="#00439C" />
-        <text x="50%" y="55%" 
-              font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
-              font-size="26" 
-              font-weight="bold" 
-              fill="#FFFFFF" 
-              text-anchor="middle" 
-              dominant-baseline="middle">
-          Jogar
-        </text>
-      </svg>
-    </button>
-    <button class="more-btn">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
-        <circle cx="40" cy="40" r="38" fill="#00439C" />
-        <circle cx="26" cy="40" r="4" fill="#FFFFFF" />
-        <circle cx="40" cy="40" r="4" fill="#FFFFFF" />
-        <circle cx="54" cy="40" r="4" fill="#FFFFFF" />
-      </svg>
-    </button>
-  </div>
-
-  <div class="game-modal" id="game-modal">
-    <button class="close-btn" id="close-modal-btn">×</button>
-    <iframe 
-      src="" 
-      class="fullscreen-iframe"
-      id="game-iframe"
-      allowfullscreen
-      allow="autoplay; fullscreen; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      scrolling="no">
-    </iframe>
-  </div>
-
-  <div class="side-info" id="side-info-container">
-    <div class="game-card">
-      <img src="assets/images/capa-dirt5.jpg" alt="DIRT 5" id="side-cover">
-      <div class="labels">
-        <span class="tag">Jogo Completo</span>
-        <span class="tag tag-blue">Atualização PS5 grátis</span>
-      </div>
-    </div>
-    <div class="progress-box">
-      <div class="progress-item">
-        <div class="progress-label">Progresso</div>
-        <div class="progress-value" id="progress-val">6%</div>
-      </div>
-      <div class="progress-item">
-        <div class="progress-label">Conquistas</div>
-        <div class="progress-value" id="trophies-val">3/21</div>
-      </div>
-    </div>
+    <p class="logout-tip" id="logout-link">Not you? <span>Sign Out</span></p>
   </div>
 
   <script>
-    function atualizarHoraCaceres() {
-        const agora = new Date();
-        const hora = agora.toLocaleTimeString('pt-BR', {
-            timeZone: 'America/Cuiaba',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-        document.getElementById('hora-caceres').textContent = hora;
-    }
-    atualizarHoraCaceres();
-    setInterval(atualizarHoraCaceres, 60000);
+    // STORAGE — SEM perfil.jpg! Tudo salvo no navegador
+    const STORAGE_KEY = 'ps5_user_profiles';
+    let profiles = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let activeId = localStorage.getItem('ps5_active_profile') || null;
+    let tempPhoto = null;
 
-    const jogos = [
-        { nome: "Demon's Souls™ | PS5", fundo: "assets/images/fundo-demons-souls.jpg", capa: "assets/images/capa-demons-souls.jpg", progresso: "12%", conquistas: "8/48" },
-        { nome: "Like a Dragon™ | PS5", fundo: "assets/images/fundo-like-a-dragon.jpg", capa: "assets/images/capa-like-a-dragon.jpg", progresso: "45%", conquistas: "15/35" },
-        { nome: "DIRT 5™ | PS5", fundo: "assets/images/fundo-dirt5.jpg", capa: "assets/images/capa-dirt5.jpg", progresso: "6%", conquistas: "3/21" },
-        { nome: "God of War™ | PS5", fundo: "assets/images/fundo-god-of-war.jpg", capa: "assets/images/capa-god-of-war.jpg", progresso: "78%", conquistas: "24/36" },
-        { nome: "Marvel's Spider-Man™ | PS5", fundo: "assets/images/fundo-spider-man.jpg", capa: "assets/images/capa-spider-man.jpg", progresso: "32%", conquistas: "12/42", iframeUrl: "https://jogos101.com/g/spider-man-web-shooter/embed" },
-        { nome: "Horizon Forbidden West™ | PS5", fundo: "assets/images/fundo-horizon.jpg", capa: "assets/images/capa-horizon.jpg", progresso: "55%", conquistas: "18/58" },
-        { nome: "Ratchet & Clank™ | PS5", fundo: "assets/images/fundo-ratchet-clank.jpg", capa: "assets/images/capa-ratchet-clank.jpg", progresso: "20%", conquistas: "7/32" },
-        { nome: "Rocket Goal.io | Jogo", fundo: "assets/images/fundo-rocket-goal.jpg", capa: "assets/images/capa-rocket-goal.jpg", progresso: "—", conquistas: "—", iframeUrl: "https://rocketgoal.io" },
-        { 
-          nome: "Grand Theft Auto V™ | PS5", 
-          fundo: "assets/images/fundo-gta-v.jpg", 
-          capa: "assets/images/capa-gta-v.jpg", 
-          progresso: "—", 
-          conquistas: "—", 
-          iframeUrl: "https://www.youtube.com/embed/UWzV0AFXukI?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&disablekb=1&fs=1&iv_load_policy=3" 
-        },
-        { 
-          nome: "Five Nights At Freddy's™ | Jogo", 
-          fundo: "assets/images/fundo-fnaf.jpg", 
-          capa: "assets/images/capa-fnaf.jpg", 
-          progresso: "—", 
-          conquistas: "—", 
-          iframeUrl: "https://fivenightsatfreddys-fnaf.io/fnaf-1-unblocked/" 
-        },
-        { 
-          nome: "Eaglercraft™ | 1.20.6", 
-          fundo: "assets/images/fundo-eaglercraft.jpg", 
-          capa: "assets/images/capa-eaglercraft.jpg", 
-          progresso: "—", 
-          conquistas: "—", 
-          iframeUrl: "https://eymenwsmc.site/120/?v=20260824-5430efd6" 
+    // CLOCK
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = 
+        now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:false });
+    }
+    updateClock();
+    setInterval(updateClock, 60000);
+
+    // SALVAR PERFIS
+    function saveProfiles() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+    }
+
+    // ATUALIZAR FOTO NO CANTO — A FUNÇÃO PRINCIPAL! ✅
+    function updateCornerAvatar(photoData = null) {
+      const avatarEl = document.getElementById('current-avatar');
+      
+      if (photoData) {
+        // TEM FOTO ESCOLHIDA — MOSTRA ELA
+        avatarEl.innerHTML = `<img src="${photoData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        avatarEl.classList.add('has-photo');
+      } else {
+        // SEM FOTO — MOSTRA ÍCONE PADRÃO
+        avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+        avatarEl.classList.remove('has-photo');
+      }
+    }
+
+    // RENDERIZAR TELA DE SELEÇÃO
+    function renderProfiles() {
+      const container = document.getElementById('accounts-row');
+      container.innerHTML = '';
+
+      profiles.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'user-account';
+        div.innerHTML = `
+          <div class="avatar-ring">
+            <img class="avatar-img" src="${p.photo}" alt="${p.name}">
+          </div>
+          <span class="user-name">${p.name}</span>
+        `;
+        div.onclick = () => login(p.id);
+        container.appendChild(div);
+      });
+
+      // BOTÃO NOVO USUÁRIO
+      const newBtn = document.createElement('div');
+      newBtn.className = 'new-user-btn';
+      newBtn.innerHTML = `
+        <div class="plus-circle">+</div>
+        <span class="new-user-text">New User</span>
+      `;
+      newBtn.onclick = openCreateScreen;
+      container.appendChild(newBtn);
+    }
+
+    // ABRIR TELA DE CRIAÇÃO
+    function openCreateScreen() {
+      document.getElementById('select-screen').classList.add('hidden');
+      document.getElementById('create-screen').classList.add('active');
+      tempPhoto = null;
+      document.getElementById('preview-holder').classList.remove('has-img');
+      document.getElementById('preview-img').src = '';
+      document.getElementById('name-field').value = '';
+    }
+
+    // VOLTAR PARA SELEÇÃO
+    document.getElementById('back-to-select').onclick = () => {
+      document.getElementById('create-screen').classList.remove('active');
+      document.getElementById('select-screen').classList.remove('hidden');
+    };
+
+    // PREVISUALIZAR FOTO NA CRIAÇÃO
+    document.getElementById('file-input').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        tempPhoto = ev.target.result;
+        document.getElementById('preview-img').src = tempPhoto;
+        document.getElementById('preview-holder').classList.add('has-img');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // TROCAR FOTO JÁ LOGADO
+    document.getElementById('change-photo-input').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const newPhoto = ev.target.result;
+        // Atualizar no perfil ativo
+        const profile = profiles.find(p => p.id === activeId);
+        if (profile) {
+          profile.photo = newPhoto;
+          saveProfiles();
+          updateCornerAvatar(newPhoto); // ✅ Atualiza no canto na hora!
         }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // CRIAR CONTA
+    document.getElementById('create-account-btn').onclick = () => {
+      const name = document.getElementById('name-field').value.trim();
+      if (!name) return alert('Enter your name!');
+      if (!tempPhoto) return alert('Choose a profile photo!');
+
+      const newProfile = {
+        id: 'profile_' + Date.now(),
+        name: name,
+        photo: tempPhoto
+      };
+      profiles.push(newProfile);
+      saveProfiles();
+      login(newProfile.id);
+    };
+
+    // ENTRAR
+    function login(id) {
+      activeId = id;
+      localStorage.setItem('ps5_active_profile', id);
+      const profile = profiles.find(p => p.id === id);
+      
+      // Atualizar foto no canto ✅
+      updateCornerAvatar(profile.photo);
+
+      // Transição de telas
+      document.getElementById('select-screen').classList.add('hidden');
+      document.getElementById('create-screen').classList.remove('active');
+      document.getElementById('bg-layer').classList.add('fade-out');
+      
+      setTimeout(() => {
+        document.getElementById('ps5-interface').classList.add('visible');
+      }, 400);
+    }
+
+    // SAIR
+    document.getElementById('logout-link').onclick = () => {
+      activeId = null;
+      localStorage.removeItem('ps5_active_profile');
+      
+      // Volta ao ícone padrão ✅
+      updateCornerAvatar(null);
+
+      document.getElementById('ps5-interface').classList.remove('visible');
+      document.getElementById('bg-layer').classList.remove('fade-out');
+      
+      setTimeout(() => {
+        renderProfiles();
+        document.getElementById('select-screen').classList.remove('hidden');
+      }, 400);
+    };
+
+    // NAVEGAÇÃO DOS JOGOS
+    const games = [
+      { name: "Grand Theft Auto V™", cover: "assets/images/capa-gta.jpg" },
+      { name: "Five Nights At Freddy's™", cover: "assets/images/capa-fnaf.jpg" },
+      { name: "Minecraft™", cover: "assets/images/capa-minecraft.jpg" },
+      { name: "DIRT 5™", cover: "assets/images/capa-dirt5.jpg" },
+      { name: "Marvel's Spider-Man™", cover: "assets/images/capa-spiderman.jpg" }
     ];
+    let currentGameIndex = 2;
 
-    const covers = document.querySelectorAll('.game-cover');
-    const carousel = document.getElementById('carousel');
-    const gameBg = document.getElementById('game-bg');
-    const gameTitle = document.getElementById('game-title');
-    const sideCover = document.getElementById('side-cover');
-    const progressVal = document.getElementById('progress-val');
-    const trophiesVal = document.getElementById('trophies-val');
-    const playBtn = document.getElementById('play-game-btn');
-    const modal = document.getElementById('game-modal');
-    const closeBtn = document.getElementById('close-modal-btn');
-    const gameIframe = document.getElementById('game-iframe');
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.onclick = () => {
+        document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        currentGameIndex = parseInt(card.dataset.index);
+        const game = games[currentGameIndex];
+        document.getElementById('game-title').textContent = game.name;
+        document.getElementById('side-cover').src = game.cover;
+      };
+    });
+
+    // INICIALIZAR
+    renderProfiles();
     
-    let currentIndex = 2;
-
-    function calcularDeslocamento() {
-        const capaLargura = covers[0].offsetWidth + 20;
-        return 50 - (currentIndex * capaLargura);
+    // Se tem sessão ativa → entra direto com a foto correta ✅
+    if (activeId) {
+      const profile = profiles.find(p => p.id === activeId);
+      if (profile) {
+        updateCornerAvatar(profile.photo);
+        document.getElementById('select-screen').classList.add('hidden');
+        document.getElementById('bg-layer').classList.add('fade-out');
+        document.getElementById('ps5-interface').classList.add('visible');
+      }
     }
-
-    function atualizarCarrossel() {
-        covers.forEach((cover, i) => {
-            cover.classList.remove('active');
-            if (i === currentIndex) cover.classList.add('active');
-        });
-        carousel.style.transform = `translateX(${calcularDeslocamento()}px)`;
-        const jogo = jogos[currentIndex];
-        gameBg.style.backgroundImage = `url('${jogo.fundo}')`;
-        gameTitle.textContent = jogo.nome;
-        sideCover.src = jogo.capa;
-        progressVal.textContent = jogo.progresso;
-        trophiesVal.textContent = jogo.conquistas;
-    }
-
-    covers.forEach((cover, i) => {
-        cover.addEventListener('click', () => {
-            currentIndex = i;
-            atualizarCarrossel();
-        });
-    });
-
-    playBtn.addEventListener('click', () => {
-        const jogoAtual = jogos[currentIndex];
-        if (jogoAtual.iframeUrl) {
-            gameIframe.src = jogoAtual.iframeUrl;
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        } else {
-            alert(`Iniciando ${jogoAtual.nome}...`);
-        }
-    });
-
-    closeBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-        gameIframe.src = "";
-    });
-
-    // === AÇÃO AO CLICAR NO BOTÃO NEW USER ===
-    document.getElementById('new-user-btn').addEventListener('click', () => {
-        // Esconde a tela inicial
-        document.getElementById('start-screen').classList.add('hidden');
-        
-        // Mostra a interface principal com animação em cascata
-        setTimeout(() => {
-            document.getElementById('game-bg').classList.add('visible');
-            document.getElementById('bg-overlay').classList.add('visible');
-            document.getElementById('main-header').classList.add('visible');
-            document.getElementById('carousel-viewport').classList.add('visible');
-            document.getElementById('game-title').classList.add('visible');
-            document.getElementById('play-button-container').classList.add('visible');
-            document.getElementById('side-info-container').classList.add('visible');
-            
-            // Inicializa o carrossel
-            setTimeout(atualizarCarrossel, 100);
-        }, 300);
-    });
-
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
-    document.addEventListener('touchend', e => {
-        const touchEndX = e.changedTouches[0].clientX;
-        if (touchStartX - touchEndX > 50) {
-            currentIndex = (currentIndex + 1) % jogos.length;
-            atualizarCarrossel();
-        } else if (touchEndX - touchStartX > 50) {
-            currentIndex = (currentIndex - 1 + jogos.length) % jogos.length;
-            atualizarCarrossel();
-        }
-    });
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'ArrowRight') {
-            currentIndex = (currentIndex + 1) % jogos.length;
-            atualizarCarrossel();
-        } else if (e.key === 'ArrowLeft') {
-            currentIndex = (currentIndex - 1 + jogos.length) % jogos.length;
-            atualizarCarrossel();
-        } else if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeBtn.click();
-        }
-    });
-
-    window.addEventListener('resize', atualizarCarrossel);
   </script>
-
 </body>
 </html>
 
